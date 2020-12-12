@@ -12,7 +12,7 @@ This space should be devoted to keep a nice collection of references, books, pre
 
 ### Pre-prints
 
-(TBD)
+- [Neural ODEs](https://arxiv.org/pdf/1806.07366v5.pdf): This is the main paper on neural ODEs where they were introduced by Chen *et al.* 
 
 ### References
 
@@ -20,4 +20,7 @@ This space should be devoted to keep a nice collection of references, books, pre
 
 ### Websites
 
-(TBD)
+- [Depth First](https://www.depthfirstlearning.com/): DFL is a compendium of curricula to help you deeply understand Machine Learning.
+- [Neural ODEs course](https://www.depthfirstlearning.com/2019/NeuralODEs#:~:text=Neural%20ODEs%20are%20neural%20network,efficiently%20train%20models%20via%20ODEs.): This is a course (set of notes) to understand the main paper about neural ODES ([this](https://arxiv.org/abs/1806.07366)). It goes from the very basics on ODEs to the discussion on the adjoint method and auto-diff.
+- [Easy neural ODEs](https://github.com/jacobjinkelly/easy-neural-ode): The repository where we can find the code of the paper [learning differential equations that are easy to solve](https://arxiv.org/pdf/2007.04504.pdf).
+- [Augmented neural ODES](https://github.com/EmilienDupont/augmented-neural-odes): This is the repository where we can find the code of the paper on [augmented neural ODEs](https://arxiv.org/abs/1904.01681). In here we can find the actual implementation of (augmented) neural ODEs. 
