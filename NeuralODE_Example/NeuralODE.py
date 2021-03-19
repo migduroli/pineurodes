@@ -26,6 +26,7 @@ class NeuralODE(nn.Module):
         :param return_whole_sequence: Bool
         :return: the solved z(t)
         """
+
         t = t.to(z0)    # Match the data type to z0
         z = ODEAdjoint.apply(z0, t, self.func.flatten_parameters(), self.func)
         if return_whole_sequence:

@@ -15,21 +15,41 @@ use_cuda = torch.cuda.is_available()
 torch.manual_seed(0)
 
 
-class LinearODEF(ODEfunc):
-    """
-    Demo class with linear operation which have a 2x2 weight matrix operation
-    """
-
-    def __init__(self, W):
-        super(LinearODEF, self).__init__()
-        # time independent ODE
-        self.lin = nn.Linear(2, 2, bias=False)
-        self.lin.weight = nn.Parameter(W)
+class TestODEF(ODEfunc):
+    def __init__(self, A, B, x0):
+        super(TestODEF, self).__init__()
+        self.A = nn.Linear(2, 2, bias=False)
+        self.A.weight = nn.Parameter(A)
+        self.B = nn.Linear(2, 2, bias=False)
+        self.B.weight = nn.Parameter(B)
+        self.x0 = nn.Parameter(x0)
 
     def forward(self, x, t):
-        # x.shape (bs, x_dim)
-        # t.shape (bs, 1)
-        return self.lin(x)
+        xTx0 = torch.sum(x*self.x0, dim=1)
+        dxdt = torch.sigmoid(xTx0) * self.A(x - self.x0) + torch.sigmoid(-xTx0) * self.B(x + self.x0)
+        return dxdt
+
+class NNODEF(ODEfunc):
+    def __init__(self, in_dim, hid_dim, time_invariant=False):
+        super(NNODEF, self).__init__()
+        self.time_invariant = time_invariant
+
+        if time_invariant:
+            self.lin1 = nn.Linear(in_dim, hid_dim)
+        else:
+            self.lin1 = nn.Linear(in_dim+1, hid_dim)
+        self.lin2 = nn.Linear(hid_dim, hid_dim)
+        self.lin3 = nn.Linear(hid_dim, in_dim)
+        self.elu = nn.ELU(inplace=True)
+
+    def forward(self, x, t):
+        if not self.time_invariant:
+            x = torch.cat((x, t), dim=-1)
+
+        h = self.elu(self.lin1(x))
+        h = self.elu(self.lin2(h))
+        out = self.lin3(h)
+        return out
 
 
 def generate_trajectory(ode, initial_value, n_points=200, t_max=6.29 * 5):
@@ -54,7 +74,7 @@ def generate_trajectory(ode, initial_value, n_points=200, t_max=6.29 * 5):
     observations = ode.forward(initial_value, times, return_whole_sequence=True).detach()
 
     # add noise to the observation
-    observations = observations + torch.randn_like(observations) * 0.02
+    observations = observations + torch.randn_like(observations) * 0.01
 
     return observations, index_np, times_np, times
 
@@ -86,23 +106,22 @@ def create_batch(obs, idx_np, time_np, times, t_max=5):
 
 if __name__ == '__main__':
     # set hyper parameter
-    n_step = 100  # gradient descent step
-    plot_freq = 10
+    n_step = 5000  # gradient descent step
+    plot_freq = 250
 
-    # noinspection PyArgumentList
-    LinearFunctionExample = LinearODEF(Tensor([[-1., 0], [0, -1.]]))
-    RandomLinearODEF = LinearODEF(torch.randn(2, 2))
+    func = TestODEF(Tensor([[-0.1, -0.5], [0.5, -0.1]]), Tensor([[0.2, 1.], [-1, 0.2]]), Tensor([[-1., 0.]]))
+    ode_true = NeuralODE(func)
 
-    ode_true = NeuralODE(LinearFunctionExample)
-    ode_trained = NeuralODE(RandomLinearODEF)
+    func = NNODEF(2, 16, time_invariant=True)
+    ode_trained = NeuralODE(func)
 
     # Create data and initial value
     # noinspection PyArgumentList
-    z0 = Variable(torch.Tensor([[1, 1]]))
+    z0 = Variable(torch.Tensor([[0.6, 0.3]]))
 
     # generate the labels from true trajectory
-    t_max = 5
-    n_points = 50
+    t_max = 6.29*5
+    n_points = 200
     # (time index, batch size, dimension of output)
     obs, index_np, time_np, times = generate_trajectory(ode_true, z0, n_points=n_points, t_max=t_max)
 
@@ -131,14 +150,14 @@ if __name__ == '__main__':
         if i % plot_freq == 0:
             print("step: {}, loss: {}".format(i, loss))
             z_p = ode_trained(obs[0], times, return_whole_sequence=True)
-            plot_trajectories(obs=[obs], times=[times], trajs=[z_p], save=f"imgs2/{i}.png")
+            plot_trajectories(obs=[obs], times=[times], trajs=[z_p], save=f"imgs4/{i}.png")
 
         step_list.append(i)
         loss_list.append(float(loss))
 
     plt.plot(step_list, loss_list)
     plt.show(block=False)
-    plt.savefig('imgs2/loss_graph.png')
+    plt.savefig('imgs4/loss_graph.png')
     plt.close()
 
     test = 0

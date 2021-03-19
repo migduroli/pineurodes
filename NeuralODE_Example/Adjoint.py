@@ -47,6 +47,7 @@ class ODEAdjoint(torch.autograd.Function):
 
         func = ctx.func
         t, z, flat_parameters = ctx.saved_tensors
+
         time_len, bs, *z_shape = z.size()
 
         n_dim = np.prod(z_shape)
