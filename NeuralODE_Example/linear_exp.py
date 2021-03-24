@@ -131,14 +131,14 @@ if __name__ == '__main__':
         if i % plot_freq == 0:
             print("step: {}, loss: {}".format(i, loss))
             z_p = ode_trained(obs[0], times, return_whole_sequence=True)
-            plot_trajectories(obs=[obs], times=[times], trajs=[z_p], save=f"imgs/{i}.png")
+            plot_trajectories(obs=[obs], times=[times], trajs=[z_p], save=f"imgs2D/{i}.png")
 
         step_list.append(i)
         loss_list.append(float(loss))
 
     plt.plot(step_list, loss_list)
     plt.show(block=False)
-    plt.savefig('imgs/loss_graph.png')
+    plt.savefig('imgs2D/loss_graph.png')
     plt.close()
 
     test = 0
