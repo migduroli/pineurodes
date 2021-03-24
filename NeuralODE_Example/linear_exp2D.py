@@ -99,7 +99,7 @@ if __name__ == '__main__':
     # Create data and initial value
     # noinspection PyArgumentList
     z0 = Variable(torch.Tensor([[1, 1]]))
-    print(z0.size())
+
     # generate the labels from true trajectory
     t_max = 5
     n_points = 50
