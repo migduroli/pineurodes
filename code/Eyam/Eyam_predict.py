@@ -13,7 +13,7 @@ import argparse
 
 
 parser = argparse.ArgumentParser('SIR_result')
-parser.add_argument('--itr', type=int, default=3000)
+parser.add_argument('--itr', type=int, default=400)
 args = parser.parse_args()
 
 with open('Learning/{}.json'.format(args.itr)) as json_file:
@@ -22,7 +22,7 @@ with open('Learning/{}.json'.format(args.itr)) as json_file:
 weight = []
 bias = []
 
-for i in range(0, 11, 2):
+for i in range(0, 7, 2):
     weight.append(data["net.{}.weight".format(i)])
     bias.append(data["net.{}.bias".format(i)])
 
@@ -36,7 +36,7 @@ class Eyam(nn.Module):
 
     def forward(self, t, y):
         y = torch.matmul(torch.Tensor(self.weight[0]), y) + torch.Tensor(self.bias[0])
-        for i in range(1, 6):
+        for i in range(1, 4):
             y = self.relu(y)
             y = torch.matmul(torch.Tensor(self.weight[i]), y) + torch.Tensor(self.bias[i])
         return y
@@ -86,14 +86,20 @@ ax1.cla()
 ax1.plot(t_eyam, s_eyam, 'bo', t_eyam, i_eyam, 'ro', t_eyam, r_eyam, 'go', )
 ax1.plot(t.numpy(), sir_y.numpy()[:, 0], 'b', t.numpy(), sir_y.numpy()[:, 1], 'r', t.numpy(),
          sir_y.numpy()[:, 2], 'g')
+s_pred = pred_y.numpy()[:, 0]
+i_pred = pred_y.numpy()[:, 1]
+r_pred = pred_y.numpy()[:, 2]
+tot_pred = s_pred+i_pred+r_pred
 ax1.plot(t.numpy(), pred_y.numpy()[:, 0], 'b--', t.numpy(), pred_y.numpy()[:, 1], 'r--', t.numpy(),
-         pred_y[:, 2], 'g--')
+         261-pred_y[:, 0]-pred_y[:, 1], 'g--')
+         #pred_y.numpy()[:, 2], 'g--')
+
 # ax1.legend(loc=1)
 ax1.set_xlabel('Days', fontsize=10)
 ax1.set_ylabel('Numbers', fontsize=10)
 #ax1.set_xlim(-5, 200)
-ax1.set_ylim(-10, 260)
-ax1.text(-25, 250, '(a)', fontsize=15)
+ax1.set_ylim(-10, 275)
+ax1.text(-40, 250, '(a)', fontsize=15)
 
 ax2.cla()
 ax2.plot(s_eyam, i_eyam, 'ko', label='Original data')
